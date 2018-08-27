@@ -80,6 +80,22 @@ app.put("/article/:id", function(req, res) {
     ).then(function(dbArticle){
         console.log(dbArticle);
     })
+});
+
+app.post("/article/:id", function(req, res) {
+    console.log(req.body);
+    db.Note.create(req.body)
+    .then(function(dbNote) {
+        return db.Article.findOneAndUpdate({_id: req.params.id}, {note: dbNote._id}, {new: true});
+    })
+});
+
+app.get("/note/:id", function(req, res) {
+    db.Article.findOne({_id: req.params.id})
+    .populate("note")
+    .then(function(dbNote) {
+        res.json(dbNote.note.body);
+    })
 })
 
 app.listen(PORT, function() {

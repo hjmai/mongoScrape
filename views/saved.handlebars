@@ -5,8 +5,8 @@
             <div class="card-header">
                 {{title}}
                 <a href="{{link}}" class="btn btn-primary">Read Article</a>
-                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                    Launch demo modal
+                <button type="button" class="btn btn-success seeNote" data-id={{_id}} data-toggle="modal" data-target="#exampleModal">
+                    Notes
                 </button>
             </div>
         </div>
@@ -17,13 +17,13 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                ...
+                <span class="noteText"></span>
             </div>
             <div class="modal-body">
                 <div class="input-group mb-12">
                     <div class="input-group-prepend">
                     </div>
-                    <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+                    <input type="text" class="form-control note" />
                 </div>
             </div>
             <div class="modal-footer">
@@ -36,5 +36,25 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>
 <script>
-    $(".saveNote")
+    $(".seeNote").on("click", function() {
+        $('.noteText').empty();
+        var dataId = $(this).attr('data-id');
+        $(".saveNote").attr('data-id', dataId);
+        $.ajax({
+            method: "GET",
+            url: "/note/" + dataId
+        }).then(function(result){
+            $('.noteText').text(result);
+        })
+    })
+    $(".saveNote").on("click", function() {
+        if($(".note").val() !== "") {
+            var noteToSave = $(".note").val().trim();
+            $.ajax({
+                method: "POST",
+                url: "/article/" + $(".saveNote").attr('data-id'),
+                data: {body: noteToSave}
+            })
+        }
+    })
 </script>

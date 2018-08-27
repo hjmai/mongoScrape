@@ -27,7 +27,7 @@
         console.log("Hi");
         var dataId = $(this).attr('data-id');
         $.ajax({
-            type: "PUT",
+            method: "PUT",
             url: "/article/" + dataId
         });
     });
