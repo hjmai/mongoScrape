@@ -1,9 +1,34 @@
-<script
-    src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+{{#each data}}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                {{title}}
+                <a href="{{link}}" class="btn btn-primary">Read Article</a>
+                <a data-id={{_id}} class="btn btn-secondary text-white save">Save Article</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{/each}}
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>
 <script>
-    $.getJSON("/all", function(data){
+    $.getJSON("/all", function (data) {
         console.log(data);
-    })
+    });
+    
+    $("#clear").on("click", function() {
+        $.getJSON("/clear");
+        window.location.reload();
+    });
+
+    $(".save").on("click", function() {
+        console.log("Hi");
+        var dataId = $(this).attr('data-id');
+        $.ajax({
+            type: "PUT",
+            url: "/article/" + dataId
+        });
+    });
 </script>

@@ -3,6 +3,8 @@ var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var PORT = process.env.PORT || 3000;
 var app = express();
+var cheerio = require("cheerio");
+var request = require("request");
 
 // Serve static content for the app from the "public" directory in the application directory.
 app.use(express.static("public"));
@@ -30,7 +32,10 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
 app.get("/", function(req, res) {
-    res.render("index");
+    db.Article.find({})
+    .then(function(data){
+        res.render("index", {data: data})
+    })
 });
 
 app.get("/all", function(req, res) {
@@ -40,14 +45,41 @@ app.get("/all", function(req, res) {
     });
 })
 
-app.get("/test", function(req, res) {
-    db.Article.create({
-        title: "Hi",
-        link: "https://www.google.com",
-        summary: "Hello World"
-    }).then(
-        res.redirect("/")
-    )
+app.get("/scrape", function(req, res) {
+    request("https://old.reddit.com/r/news/", function(error, response, html) {
+        var $ = cheerio.load(html);
+        $('a.title').each(function(i, element) {
+            var results = {};
+            results.title = $(element).text();
+            results.link = $(element).attr("href");
+            db.Article.create(results)
+        });
+    })
+    res.render("scrape", {message: "Scrape complete"});
+});
+
+app.get("/clear", function(req, res) {
+    db.Article.collection.drop()
+    .then(function(dbArticles) {
+        res.redirect("/");
+    });
+})
+
+app.get("/saved", function(req, res) {
+    db.Article.find({saved: true})
+    .then(function(data) {
+        res.render("saved", {data: data})
+    })
+})
+
+app.put("/article/:id", function(req, res) {
+    db.Article.findOneAndUpdate(
+        {_id: req.params.id},
+        {saved: true},
+        {new: true}
+    ).then(function(dbArticle){
+        console.log(dbArticle);
+    })
 })
 
 app.listen(PORT, function() {
